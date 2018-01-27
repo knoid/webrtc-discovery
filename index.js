@@ -3,9 +3,10 @@ const cors = require('cors');
 const express = require('express');
 const routes = require('./routes');
 
-const PORT = process.env.PORT || 3000;
+const { NODE_ENV, PORT = 3000 } = process.env;
 
 express()
+  .set('trust proxy', NODE_ENV === 'production')
   .use(cors())
   .use(bodyParser.json())
 
