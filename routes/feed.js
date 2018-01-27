@@ -7,7 +7,17 @@ module.exports = (req, res) => {
   }
 
   const send = writers[privateId] = (action, data, sender) => {
+    setPingTimeout();
     res.write('data: ' + JSON.stringify({ action, data, sender }) + '\n\n');
+  }
+
+  let pingTimeout;
+  function setPingTimeout() {
+    clearTimeout(pingTimeout);
+    pingTimeout = setTimeout(() => {
+      send('ping', 'pong');
+      setPingTimeout();
+    }, 30 * 1000);
   }
 
   clearTimeout(timeouts[privateId]);
@@ -35,6 +45,7 @@ module.exports = (req, res) => {
   });
 
   res.on('close', () => {
+    clearTimeout(pingTimeout);
     iceCandidatesObserver.cancel();
     peersObserver.cancel();
     peers.remove(p => p.privateId === privateId);
